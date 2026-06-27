@@ -7,14 +7,14 @@ RESULTS_ROOT="${RESULTS_ROOT:-${ROOT}/results}"
 
 mkdir -p "${RESULTS_ROOT}"
 
-echo "[1/3] Image/Fourier-Bessel kernel experiment"
+echo "[1/4] Image/Fourier-Bessel kernel experiment"
 export PAPER_IMAGE_DATA_DIR="${PAPER_IMAGE_DATA_DIR:-${DATA_ROOT}/new_dataset_5.3.26}"
 export PAPER_IMAGE_OUTPUT_DIR="${RESULTS_ROOT}/image_kernel/new_run"
 export PAPER_IMAGE_FIGURES_DIR="${RESULTS_ROOT}/image_kernel/new_run/figures"
 mkdir -p "${PAPER_IMAGE_OUTPUT_DIR}" "${PAPER_IMAGE_FIGURES_DIR}"
 python3 "${ROOT}/experiments/image_kernel/run_final_1000.py"
 
-echo "[2/3] Point-cloud self-tuning experiment"
+echo "[2/4] Point-cloud self-tuning experiment"
 python3 "${ROOT}/experiments/pointcloud_self_tuning/run_experiment.py" \
   --data-path "${DATA_ROOT}/data_3D.pkl" \
   --save-folder "${RESULTS_ROOT}/pointcloud_self_tuning/new_run" \
@@ -29,7 +29,17 @@ python3 "${ROOT}/experiments/pointcloud_self_tuning/run_experiment.py" \
   --knn-k 30 \
   --render-pdf true
 
-echo "[3/3] SO(3)/SO(2) convergence experiment"
+echo "[3/4] Double-rotation parameterization experiment"
+DOUBLE_ROTATION_INPUT_DIR="${DOUBLE_ROTATION_INPUT_DIR:-${DATA_ROOT}/roy_lederman_data/data}"
+python3 "${ROOT}/experiments/double_rotation/run_experiment.py" \
+  --input-path "${DOUBLE_ROTATION_INPUT_DIR}" \
+  --n-images 5000 \
+  --output-dir "${RESULTS_ROOT}/double_rotation/new_run" \
+  --t 10 \
+  --num-neighbors 20 \
+  --num-rotations 300
+
+echo "[4/4] SO(3)/SO(2) convergence experiment"
 export PAPER_EXP3_OUTPUT_DIR="${RESULTS_ROOT}/so3_so2_convergence/new_run"
 mkdir -p "${PAPER_EXP3_OUTPUT_DIR}"
 python3 "${ROOT}/experiments/so3_so2_convergence/converges_so3_so2_exp_journal_gpu.py"

@@ -7,6 +7,7 @@ artifacts for the G-invariant spectral embedding paper.
 
 - `experiments/image_kernel/`: image/Fourier-Bessel kernel experiments.
 - `experiments/pointcloud_self_tuning/`: point-cloud experiments with self-tuning bandwidths.
+- `experiments/double_rotation/`: double-rotation image parameterization experiment.
 - `experiments/so3_so2_convergence/`: final SO(3)/SO(2) convergence experiment.
 - `results/`: lightweight CSV/NPZ summaries and publication figures.
 - `data/`: small checked-in metadata used by examples.
@@ -58,6 +59,18 @@ python3 experiments/pointcloud_self_tuning/run_experiment.py \
   --laplacian-type RWGL \
   --knn-k 30 \
   --render-pdf true
+```
+
+Double-rotation parameterization experiment:
+
+```bash
+python3 experiments/double_rotation/run_experiment.py \
+  --input-path /path/to/roy_lederman_data/data \
+  --n-images 5000 \
+  --output-dir results/double_rotation/new_run \
+  --t 10 \
+  --num-neighbors 20 \
+  --num-rotations 300
 ```
 
 SO(3)/SO(2) convergence experiment:
