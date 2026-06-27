@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.log
+*.pkl
+
+# External/raw datasets are documented but not committed.
+data/data_3D.pkl
+data/new_dataset_5.3.26/
+projection_data/
+newest_dataset/
+
+# Local rerun outputs.
+results/**/new_run/
