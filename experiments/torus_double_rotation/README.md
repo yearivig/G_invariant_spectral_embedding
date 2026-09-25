@@ -248,5 +248,3 @@ locked versions.
 
 - Vigder, Hoyos, Thong, Andén, Kileel & Moscovich, *Group Invariant Spectral Embedding*, arXiv:2607.08987, 2026. <https://arxiv.org/abs/2607.08987> — Algorithm 1 and the minimum and integral kernels (Eqs. 3, 4, 8, 9).
 - Nene, Nayar & Murase, *Columbia Object Image Library (COIL-100)*, Technical Report CUCS-006-96, 1996. <https://cave.cs.columbia.edu/repository/COIL-100>
-- Lederman & Talmon, *Learning the geometry of common latent variables using alternating-diffusion*, ACHA 44(3), 2018. <https://doi.org/10.1016/j.acha.2015.09.002>
-- Kohli, Cloninger & Mishne, *LDLE: Low Distortion Local Eigenmaps*, JMLR 22(282), 2021 — describes the Yoda/bulldog set as two objects "rotating at different frequencies".
