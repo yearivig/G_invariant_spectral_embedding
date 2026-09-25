@@ -114,22 +114,6 @@ in script 02 measures each object's background as the median of its frame
 borders (25 for obj87, 26 for obj72) and maps that level to 0 and 255 to 255
 linearly, clipping below. The values used are recorded in `layout.json`.
 
-## Why a new dataset rather than the existing one
-
-The Yoda / bulldog set this experiment inherits from Lederman & Talmon's
-alternating-diffusion paper has **one** degree of freedom, not two: the
-objects sit on displays turning at different constant frequencies, so both
-angles are functions of a single elapsed time $t$ and the data traces a
-winding line on the torus rather than filling it.
-
-That is fine for alternating diffusion — if the frequency ratio is irrational
-the trajectory equidistributes on $T^2$ by Weyl, so over a long horizon the
-samples look like independent draws. The confound is at **small scales**,
-which is exactly where a manifold-learning demonstration lives: consecutive
-samples lie along the winding curve, so small neighbourhoods are curve-like
-and a dimension estimate reads 1. Only once $\epsilon$ grows enough to bridge
-between adjacent windings does it read 2.
-
 ## The layout
 
 Most of script 02's design follows from four conventions:
