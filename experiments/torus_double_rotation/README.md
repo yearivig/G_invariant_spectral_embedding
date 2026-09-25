@@ -152,87 +152,15 @@ Script 02 solves for that layout and reports what fraction of object
 brightness the disk mask would discard. For two 128×128 COIL frames with a
 24px gap it lands on a 308×308 canvas, and the loss is 0.00%.
 
-## Choosing the two objects
-
-COIL's objects carry **no semantic labels**: they are `obj1` … `obj100` and
-nothing more. A pair has to meet three conditions for the experiment to
-recover a torus:
-
-1. **Each object's circle must lead with its first harmonic.** For one object
-   on a uniform angular grid the Gaussian kernel matrix is circulant, so its
-   eigenvalues are the DFT of the single profile
-   $e^{-d(\theta)^2/\varepsilon}$, $d(\theta) = \lVert I(0) - I(\theta)\rVert$.
-   If the object looks similar after a half turn, $d(\theta)$ has strong
-   second-harmonic content, harmonic 2 comes first, and the recovered circle
-   double-covers the true one.
-2. **The two objects should vary comparably with angle.** If one dominates the
-   image variance, its harmonics crowd the other's fundamental far down the
-   spectrum. Script 02 equalises this by scaling each frame's deviation from
-   its series mean.
-3. **The two objects must not look alike under rotation.** Rotating the
-   canvas by $\pi$ carries object A's position onto object B's. If they look
-   alike, the invariant kernel identifies $(\theta_A, \theta_B)$ with
-   $(\theta_B, \theta_A)$ and the quotient is $T^2/\mathbb{Z}_2$, not $T^2$.
-
-Objects with printed text tend to do best, since text breaks rotational
-symmetry decisively.
-
-**This project uses obj87 (a roll of first-aid tape) and obj72 (a cream-cheese
-tub).** Measured on their 72 frames: both lead with harmonic 1 (margins 1.81
-and 1.24 over the next harmonic), their angular energies are 249 and 230, and
-their closest approach under rotation is 1.58 times the spread of their own
-poses (well clear of the 0.6 below which a fold becomes likely).
-
-An earlier choice, obj10 (a cup) and obj12, failed on a full GPU run: obj12
-looks almost the same after a half turn on the turntable (views 180° apart
-were as close as views 5° apart), so its circle came out doubled, and the
-cup's body is rotationally symmetric, so only the handle carried the angle.
-Scoring each object alone is not enough (obj10 passed with a thin margin,
-1.03). A pair should also be checked as a pair: script 04 with `--no-min` on
-the *unrotated* 72 × 72 composites takes about a minute on a laptop, and the
-minimum kernel can at best recover that structure. For 87 + 72 it finds a
-clean torus.
-
-## Image size and the number of group elements
-
-The minimum and integral kernels are exactly invariant only in the continuum.
-On pixel images two things limit them, and both cost compute:
-
-$$\text{cost} \sim N^2 \cdot \texttt{group elements} \cdot \texttt{side}^2 .$$
-
-- **The angle grid.** With $N$ equally spaced rotations the best alignment
-  can fall up to half a spacing away from a grid angle. More group elements
-  (`--num-group-elements` in script 04) reduce this.
-- **Interpolation loss.** Rotating a sampled image by a non-multiple of 90°
-  with bilinear interpolation blurs it, and no angle grid undoes that. Only
-  larger images help, so downsampling (`--resize` in script 02) to save
-  compute makes it worse.
-
-Which one dominates depends on the objects. Comparing the minimum distances
-on originals and on randomly rotated copies (median relative error):
-
-| data | 24 | 72 | 300 group elements |
-|---|---:|---:|---:|
-| COIL obj10 + obj12, 308 px, first 60 images | 40% | | 0.83% |
-| COIL obj87 + obj72, 308 px, 30 random images | 68% | 12.7% | 7.5% |
-
-For obj87 + obj72 the error is still falling at 300, so the angle grid, not
-interpolation, is the limit there. The effect on the embedding is not known:
-this error is averaged over all pairs, while the embedding depends mostly on
-near neighbours at the chosen $\varepsilon$, and the verdict in script 04's
-figures is the direct test.
 
 ## Reading the result
 
 **Three eigenvectors never show the torus.** The data are a flat torus, two
 circles of fixed size, and embedding that without distortion takes four
 coordinates, one cos/sin pair per circle:
-$(\cos\theta_A, \sin\theta_A, \cos\theta_B, \sin\theta_B)$. Any three of
-them drop one sine, so each point is glued to its mirror image and the torus
-flattens to a cylinder, and a hand-picked triple such as $(\varphi_1,
-\varphi_2, \varphi_6)$ mixes the circles with their harmonics.
+$(\cos\theta_A, \sin\theta_A, \cos\theta_B, \sin\theta_B)$.
 
-For each kernel, script 04 instead writes two figures from the first four
+For each kernel, script 04 writes two figures from the first four
 eigenvectors $\varphi_1..\varphi_4$ of Algorithm 1:
 
 ```
@@ -277,30 +205,6 @@ script 04 with `--no-min` (Euclidean only, about 30 seconds for 5184 images).
 On the *unrotated* dataset that gives the structure the minimum kernel can at
 best recover.
 
-## A caveat on what compositing proves
-
-Disjoint supports make this dataset *exactly* a product, not approximately
-one. If the two objects never share a pixel,
-
-$$\lVert I(\theta_A,\theta_B) - I(\theta_A',\theta_B')\rVert^2
-= \lVert A(\theta_A)-A(\theta_A')\rVert^2 + \lVert B(\theta_B)-B(\theta_B')\rVert^2,$$
-
-so a Gaussian kernel factors exactly, $W = W_A \otimes W_B$, the graph
-Laplacian's eigenvectors are tensor products of the two circles', and the
-eigenvalues add. Recovering a torus from *that* is close to tautological — the
-algorithm confirms your arithmetic rather than discovering geometry.
-
-It remains a good pipeline check *because* the answer is known analytically:
-you can verify the eigenvalues come out as $\lambda_m + \mu_n$ before trusting
-the code on anything else. And the random SO(2) rotation does break the exact
-factorisation, since a rotated canvas no longer separates along the split —
-which is the interesting part, and the whole point of the invariant kernel.
-
-To break it further while keeping the latent space a torus, script 02 offers
-`--overlap` (the objects occlude each other) and `--gamma` (a nonlinearity on
-the finished canvas). Real toys on real turntables do this on their own: they
-cast shadows on each other, bounce light off each other, and sit behind a lens
-that is not linear.
 
 ## Files
 
