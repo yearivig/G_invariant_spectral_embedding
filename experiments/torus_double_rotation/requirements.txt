@@ -1,0 +1,10 @@
+# Script 01 and the tools
+numpy
+scipy
+matplotlib
+pillow
+
+# Script 02 and tools/invariance_floor.py (the experiment's own modules need these).
+# For a CPU-only install:  pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
