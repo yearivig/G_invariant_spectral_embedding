@@ -9,7 +9,7 @@ SO(2)-minimum and SO(2)-integral kernels.
 Two COIL-100 objects are composited into one frame, object A on the left and
 object B on the right, over the full Cartesian product of their poses. The
 latent space is therefore $T^2 = S^1 \times S^1$ by construction, with both
-angles set independently rather than driven along one trajectory.
+angles set independently.
 
 ## What runs
 
