@@ -26,8 +26,7 @@ The embedding follows **Algorithm 1 of the paper**. For each kernel $K$,
 $W_{ij} = K(x_i, x_j)$ (Eq. 3), $D_{ii} = \sum_j W_{ij}$ and
 $L_{RW} = I - D^{-1}W$ (Eq. 4), and maps $x_i \mapsto
 (\varphi_1(x_i), \dots, \varphi_m(x_i))$, the eigenvectors of $L_{RW}$ for the
-$m$ smallest nonzero eigenvalues. There is no diffusion time and no
-$\lambda^t$ scaling. The kernels are
+$m$ smallest nonzero eigenvalues. The kernels are
 
 | kernel | $K(x, y)$ | |
 |---|---|---|
