@@ -6,8 +6,8 @@ plots the first two), named as the files of Figure 4:
 
   <name>_NOP:<n>_IM:<kernel>_M:rotation_BW:<eps>_IC:<bool>_AS:<bool>_<tag>:<noise>_LT:RWGL.pkl
 
-with "_MIN:kabsch", "_G:<rotations>" and/or "_P:<points>" appended when those
-differ from the defaults (grid, 600, rotation), so default runs keep the
+with "_MIN:grid", "_G:<rotations>" and/or "_P:<points>" appended when those
+differ from the defaults (kabsch, 600, rotation), so default runs keep the
 paper's names. A .json with the
 same stem records every setting, the seed and lambda_0..lambda_m.
 """
@@ -32,11 +32,11 @@ class ExperimentConfig:
     num_points: int                      # n, the number of point clouds (NOP)
     kernel: str                          # min, integral, invariant_features or none (IM)
     bandwidth: float                     # epsilon (BW)
-    is_centered: bool = False            # IC
-    add_stationary: bool = False         # AS: the 80 stationary points
+    is_centered: bool = True             # IC
+    add_stationary: bool = True          # AS: the 80 stationary points
     snr_db: float = 0.0                  # noise SNR in dB, 0 = clean
     noise_tag: str = "SNR"               # filename label only: "AN" for the paper's clean files
-    min_method: str = "grid"             # grid or kabsch, minimum kernel only
+    min_method: str = "kabsch"           # kabsch or grid, minimum kernel only
     num_rotations: int = kernels.NUM_ROTATIONS
     seed: int = 0
     points: str = "rotation"             # which points of each frame: rotation (800 onward) or all
@@ -48,7 +48,7 @@ class ExperimentConfig:
 def output_stem(cfg: ExperimentConfig) -> Path:
     stem = (f"{cfg.save_name}_NOP:{cfg.num_points}_IM:{cfg.kernel}_M:rotation_BW:{cfg.bandwidth:g}"
             f"_IC:{cfg.is_centered}_AS:{cfg.add_stationary}_{cfg.noise_tag}:{cfg.snr_db:g}_LT:RWGL")
-    if cfg.kernel == "min" and cfg.min_method != "grid":
+    if cfg.kernel == "min" and cfg.min_method != "kabsch":
         stem += f"_MIN:{cfg.min_method}"
     if cfg.kernel in ("min", "integral") and not (cfg.kernel == "min" and cfg.min_method == "kabsch") \
             and cfg.num_rotations != kernels.NUM_ROTATIONS:

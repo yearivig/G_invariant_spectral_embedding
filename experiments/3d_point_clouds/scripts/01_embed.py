@@ -2,10 +2,13 @@
 """
 One embedding of the Section 5.1 point clouds with one kernel (Algorithm 1).
 
+Each cloud is centred (IC) and gets the 80 stationary points (AS) unless
+--no-is-centered / --no-add-stationary; the minimum kernel is exact (Kabsch)
+unless --min-method grid.
+
     python3 scripts/01_embed.py --kernel integral --bandwidth 47 --num-points 400
-    python3 scripts/01_embed.py --kernel min --bandwidth 47 --num-points 200 --min-method kabsch
-    python3 scripts/01_embed.py --kernel invariant_features --bandwidth 3000 --num-points 800 \\
-        --is-centered --add-stationary --snr 10
+    python3 scripts/01_embed.py --kernel min --bandwidth 47 --num-points 200 --min-method grid
+    python3 scripts/01_embed.py --kernel invariant_features --bandwidth 3000 --num-points 800 --snr 10
 
 Writes <save-folder>/<name>...pkl and .json (see tools/pipeline.py) and, unless
 --no-pdf, the scatter plot in <save-folder>/new_plots/.
@@ -32,13 +35,15 @@ def main() -> None:
     ap.add_argument("--kernel", required=True, choices=kernels.KERNELS, help="none = the Euclidean kernel (IM)")
     ap.add_argument("--bandwidth", type=float, required=True, help="epsilon (BW); the paper uses 47 for min and "
                     "integral, 3000 for invariant_features and none")
-    ap.add_argument("--is-centered", action="store_true", help="centre each cloud (IC)")
-    ap.add_argument("--add-stationary", action="store_true", help="append the 80 stationary points (AS)")
+    ap.add_argument("--is-centered", action=argparse.BooleanOptionalAction, default=True,
+                    help="centre each cloud (IC; default on)")
+    ap.add_argument("--add-stationary", action=argparse.BooleanOptionalAction, default=True,
+                    help="append the 80 stationary points (AS; default on)")
     ap.add_argument("--snr", type=float, default=0.0, help="noise SNR in dB; 0 (default) = clean")
     ap.add_argument("--noise-tag", default="SNR", help="filename label for the noise level only (the paper's clean "
                     "files use AN)")
-    ap.add_argument("--min-method", choices=["grid", "kabsch"], default="grid",
-                    help="minimum kernel: super-Fibonacci grid (default) or exact Kabsch")
+    ap.add_argument("--min-method", choices=["kabsch", "grid"], default="kabsch",
+                    help="minimum kernel: exact Kabsch (default) or the super-Fibonacci grid")
     ap.add_argument("--num-rotations", type=int, default=kernels.NUM_ROTATIONS,
                     help="size of the SO(3) grid for min (grid) and integral (default 600)")
     ap.add_argument("--seed", type=int, default=0, help="seed for the stationary points, noise and rotations")

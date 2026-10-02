@@ -16,10 +16,10 @@ norms s_i = ||X_i||_F^2, never from the N x N Gram matrices or the rotated cloud
 These are the same quantities the original pairwise loops computed.
 
 Minimum kernel, two ways (--min-method):
-  grid    (default) the minimum over the NUM_ROTATIONS-element super-Fibonacci
-          grid on SO(3) (Alexa, 2022), as in the code behind Figure 4;
-  kabsch  the exact minimum over SO(3): with C_ij = U S V^T,
-          max_R <C_ij, R> = s_1 + s_2 + d s_3, d = sign det(U V^T).
+  kabsch  (default) the exact minimum over SO(3): with C_ij = U S V^T,
+          max_R <C_ij, R> = s_1 + s_2 + d s_3, d = sign det(U V^T);
+  grid    the minimum over the NUM_ROTATIONS-element super-Fibonacci grid on
+          SO(3) (Alexa, 2022), as in the code behind the previous Figure 4.
 Integral kernel: the mean over the same grid (quasi-Monte Carlo for the Haar
 integral, Section 3.1).
 
@@ -99,7 +99,7 @@ def _over_grid(C, s, rotations, reduce, chunk: int):
     return out
 
 
-def log_kernel(X: np.ndarray, kernel: Kernel, epsilon: float, *, min_method: MinMethod = "grid",
+def log_kernel(X: np.ndarray, kernel: Kernel, epsilon: float, *, min_method: MinMethod = "kabsch",
                num_rotations: int = NUM_ROTATIONS, chunk: int = 32) -> np.ndarray:
     """log W_ij = log K(X_i, X_j) for one of the four kernels, symmetric (see the module docstring)."""
     C, s = cross_products(np.asarray(X, dtype=np.float64))
