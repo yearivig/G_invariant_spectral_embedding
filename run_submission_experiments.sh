@@ -7,8 +7,8 @@
 #   Section 5.2  Figure 5, if its data are present (otherwise skipped)     minutes
 # Heavy steps run only when asked for:
 #   RUN_SPINNING_OBJECTS=1  Section 5.3, Figure 7: downloads COIL-100 and computes the minimum and
-#                           integral kernels on 5184 images, about 2 days each on a CPU (a GPU is
-#                           about two orders of magnitude faster); INTEGRAL=0 skips the integral kernel
+#                           integral kernels on 5184 images, roughly an hour each on an Apple M2
+#                           (GPU or CPU); INTEGRAL=0 skips the integral kernel
 #   RUN_EXPERIMENT=1        rerun the Section 3.5 experiment (hours) instead of redrawing Figure 2
 # Data locations:
 #   POINTCLOUD_DATA   the Glucagon trajectory pickle (default experiments/3d_point_clouds/data/data_3D.pkl)

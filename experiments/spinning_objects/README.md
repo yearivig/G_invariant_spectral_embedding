@@ -100,15 +100,15 @@ python3 scripts/05_figure7.py --run results/run1      # writes results/run1/figu
 ```
 
 `--dry-run` on script 04 validates the dataset and prints the cost estimate
-without starting. At the full 5184 images and 308×308 this is a long run on a
-CPU. Each invariant kernel compares every pair under 300 rotations by default
-(script 04's own default, and `run_all.sh`'s): about 4e14 element-operations
-per kernel, measured at roughly two days on an Apple M2 for the minimum kernel
-(about 12 hours at 72 angles). The integral kernel costs about the same again,
-so the default run is roughly four days on that laptop (two with
-`--no-integral`). The rotated images alone
-take ~2 GB of memory. A GPU changes all of this by about two orders of
-magnitude.
+without starting. Each invariant kernel compares every ordered pair of the
+5184 images under 300 rotations (script 04's own default, and `run_all.sh`'s):
+about 8e14 element-operations per kernel. Each block of images is rotated
+once per angle and its distances to all images come from one matrix product,
+on the GPU if there is one (CUDA, or Apple's Metal). On an Apple M2 this is
+estimated at roughly 40–60 minutes per invariant kernel, on its GPU or its
+CPU alike, so about 1.5–2 hours for the whole run (an earlier, pair-by-pair
+version took about two days per kernel). The rotated images take ~2 GB of
+memory, and the run holds two or three copies.
 
 ## The COIL background
 
@@ -260,9 +260,8 @@ directory holds the pickles, the stereo and donut figures and `run_config.json`
 ## Requirements
 
 `numpy`, `scipy`, `matplotlib`, `pillow` for scripts 01–03 and the tools; plus
-`torch` and `torchvision` for script 04. A GPU is
-not required but changes the feasible problem size by about two orders of
-magnitude.
+`torch` and `torchvision` for script 04. A GPU is used when available (CUDA,
+or Apple's Metal through PyTorch's MPS backend) but is not required.
 
 `requirements.txt` lists the packages unpinned; `requirements-lock.txt` pins
 the exact versions the published dataset was built with (Python 3.14). The

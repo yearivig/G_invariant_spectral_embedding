@@ -156,14 +156,15 @@ def main() -> None:
     side = layout["final_side"]
     need_min_pass = min_d2 is None and not args.no_min
     passes = (1 if need_min_pass else 0) + (1 if args.integral else 0)
-    work = (n * n / 2) * args.num_group_elements * side * side * passes
+    work = n * n * args.num_group_elements * side * side * passes        # every ordered pair
     print(f"dataset  {img_dir}  ({available} images, {side}x{side}, prefix '{prefix}')")
     print(f"grid     {layout['n_a']} x {layout['n_b']} = {layout['n_images']}")
     print(f"using    n={n}  m={args.m}  epsilon={args.epsilon}  "
           f"{'k=' + str(args.num_neighbors) + '  ' if epsilon == 'knn' else ''}"
           f"group elements={args.num_group_elements}")
     print(f"\nSO(2) kernel work ~ {work:.2e} element-ops")
-    print("  a GPU does ~1e10-1e11 of these per second; a CPU core, ~1e8-1e9.")
+    print("  an Apple M2 does ~3e11 of these per second, on its GPU or its CPU (estimated);")
+    print("  a CUDA GPU, several times more.")
     if args.dry_run:
         print("\ndry run - stopping here")
         return
