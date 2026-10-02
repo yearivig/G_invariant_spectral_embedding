@@ -11,6 +11,7 @@ experiments/image_kernel/data/*
 experiments/torus_double_rotation/data/
 
 # Outputs: each experiment writes to its own results/ (not committed),
-# except the Section 3.5 plots kept in the repository.
+# except the Section 3.5 results behind Figure 2.
 experiments/*/results/*
-!experiments/so3_so2_convergence/results/plots_gpu/
+!experiments/so3_so2_convergence/results/so3_so2_P_1_00_results.pkl
+!experiments/so3_so2_convergence/results/plots_fitted_slopes/
