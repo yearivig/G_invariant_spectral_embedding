@@ -10,6 +10,7 @@ experiments/image_kernel/data/*
 !experiments/*/data/README.md
 experiments/torus_double_rotation/data/
 
-# Local rerun outputs.
-results/**/new_run/
-experiments/*/results/
+# Outputs: each experiment writes to its own results/ (not committed),
+# except the Section 3.5 plots kept in the repository.
+experiments/*/results/*
+!experiments/so3_so2_convergence/results/plots_gpu/

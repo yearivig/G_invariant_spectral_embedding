@@ -13,9 +13,10 @@ eigenvalues.
 | Section 5.2, Figure 5 | `experiments/image_kernel/` | tomographic images, SO(2); Euclidean, minimum, integral, invariant features |
 | Section 5.3, Figure 7 | `experiments/torus_double_rotation/` | two spinning COIL-100 objects, SO(2); Euclidean, minimum, integral |
 
-Each folder has its own README, `requirements.txt` and runner. Sections
-5.1-5.3 are organised as `scripts/` (entry points), `tools/` (modules) and
-`data/` (inputs). Python 3.12 is recommended; Sections 5.1-5.3 were also
+Each folder has its own README, `requirements.txt`, runner and `results/`
+(outputs; not committed, except the Section 3.5 plots). Sections 5.1-5.3 are
+organised as `scripts/` (entry points), `tools/` (modules) and `data/`
+(inputs). Python 3.12 is recommended; Sections 5.1-5.3 were also
 tested on Python 3.14, with identical results.
 
 ## Data
@@ -36,13 +37,17 @@ bash run_submission_experiments.sh                 # all four, in the order of t
 or each experiment on its own:
 
 ```bash
-PAPER_EXP3_OUTPUT_DIR=results/so3_so2_convergence/new_run \
+PAPER_EXP3_OUTPUT_DIR=experiments/so3_so2_convergence/results/new_run \
   python3 experiments/so3_so2_convergence/converges_so3_so2_exp_journal_gpu.py   # Figure 2
 bash experiments/pointcloud/run_all.sh                                          # Figure 4
 bash experiments/image_kernel/run_all.sh                                        # Figure 5
 (cd experiments/torus_double_rotation && bash run_all.sh)                       # Figure 7 (long; see its README)
 ```
 
-`results/` holds the committed outputs of Section 3.5. The earlier outputs of
-Sections 5.1 and 5.2 were removed, since they came from the code before its
-fixes to Algorithm 1; rerunning the experiments regenerates them.
+Outputs go to `results/` inside each experiment: `results/figure4/`,
+`results/figure5/` and `results/run1/` for Sections 5.1-5.3, and the folder
+given by `PAPER_EXP3_OUTPUT_DIR` for Section 3.5 (without it, that script
+writes to `experiments/outputs/final_so3_so2_exp3/`).
+`experiments/so3_so2_convergence/results/plots_gpu/` holds the committed
+Figure 2 plots. The earlier outputs of Sections 5.1 and 5.2 were removed, since
+they came from the code before its fixes to Algorithm 1.
