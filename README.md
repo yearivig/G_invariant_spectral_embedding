@@ -31,8 +31,16 @@ tested on Python 3.14, with identical results.
 ## Running
 
 ```bash
-bash run_submission_experiments.sh                 # all four, in the order of the paper
+bash run_submission_experiments.sh                          # the fast steps (minutes)
+RUN_SPINNING_OBJECTS=1 bash run_submission_experiments.sh   # also Section 5.3 (days on a CPU)
 ```
+
+By default the runner redraws Figure 2 from the committed results and runs
+Sections 5.1 and 5.2 if their data are present, skipping them otherwise; it
+ends with a summary of what ran. Section 5.3 computes the minimum and integral
+kernels on 5184 images (about two days each on a CPU), so it runs only with
+`RUN_SPINNING_OBJECTS=1`; `RUN_EXPERIMENT=1` also reruns the Section 3.5
+experiment (hours). The options are listed at the top of the script.
 
 or each experiment on its own:
 
