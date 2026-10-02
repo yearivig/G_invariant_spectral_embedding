@@ -5,10 +5,10 @@ __pycache__/
 .venv/
 
 # External/raw datasets are documented but not committed.
-experiments/pointcloud/data/*
-experiments/image_kernel/data/*
+experiments/3d_point_clouds/data/*
+experiments/tomographic_images/data/*
 !experiments/*/data/README.md
-experiments/torus_double_rotation/data/
+experiments/spinning_objects/data/
 
 # Outputs: each experiment writes to its own results/ (not committed),
 # except the Section 3.5 results behind Figure 2.
