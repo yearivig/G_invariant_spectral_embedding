@@ -92,11 +92,13 @@ def main() -> None:
         return
 
     trajectory = pointclouds.load_trajectory(args.data_path)
+    pkls = []
     for k, cfg in enumerate(configs, 1):
-        pkl = run_experiment(cfg, trajectory)
-        print(f"[{k}/{len(configs)}] saved {pkl.name}")
-        if not args.no_pdf:
-            from plot_embedding import render_2d_pkl_to_pdf
+        pkls.append(run_experiment(cfg, trajectory))
+        print(f"[{k}/{len(configs)}] saved {pkls[-1].name}")
+    if not args.no_pdf:                       # after all runs, so each panel can face the integral panel's way
+        from plot_embedding import render_2d_pkl_to_pdf
+        for pkl in pkls:
             render_2d_pkl_to_pdf(pkl, Path(args.save_folder) / "plots")
 
 
