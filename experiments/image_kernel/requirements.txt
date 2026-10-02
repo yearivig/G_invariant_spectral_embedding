@@ -1,0 +1,6 @@
+# Python 3.12 recommended (3.14 also tested)
+numpy
+scipy
+matplotlib
+torch        # only to read the .pt data
+aspire       # Fourier-Bessel basis (FFBBasis2D); 0.14.3 tested
