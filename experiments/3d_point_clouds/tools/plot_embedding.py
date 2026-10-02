@@ -1,5 +1,6 @@
 """
-Render saved embeddings (.pkl) as the axis-free scatter plots of Figure 4.
+Render saved embeddings (.pkl) as the axis-free scatter plots of Figure 4, with
+one scale for both axes, so a circle is drawn as a circle.
 
 A .pkl holds [phi_1, phi_2, ...]; the first two coordinates are plotted. Point i
 is coloured by sin(pi (i mod 126) / 126), a function of its frame index, with
@@ -83,6 +84,7 @@ def render_2d_pkl_to_pdf(pkl_path: str | os.PathLike, pdf_dir: str | os.PathLike
     with plt.rc_context(rc=RCPARAMS_LATEX_DOUBLE_COLUMN):
         fig, ax = plt.subplots()
         ax.scatter(x_array, y_array, c=colors, cmap="rainbow", marker="o", s=10)
+        ax.set_aspect("equal", adjustable="box")   # one scale for both axes: shapes as computed
 
         # Remove frame, axes, and title for clean figure export.
         ax.set_frame_on(False)
