@@ -8,6 +8,7 @@ SO(3)-invariant kernels of Section 3.1.
 ## Quick start
 
 ```bash
+python3.12 -m venv .venv && source .venv/bin/activate     # Python 3.12 recommended; 3.14 also tested
 pip install -r requirements.txt
 # put the trajectory pickle at data/data_3D.pkl (not public; see data/README.md)
 bash run_all.sh                                   # all 24 panels of Figure 4 -> results/figure4/

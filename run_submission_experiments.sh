@@ -1,47 +1,37 @@
 #!/usr/bin/env bash
+# All experiments of the paper, in its order. Outputs go under results/.
+#
+#   POINTCLOUD_DATA   the Glucagon trajectory pickle (default experiments/pointcloud/data/data_3D.pkl)
+#   IMAGE_DATA_DIR    folder with projections-synth.pt and output_main.csv (default experiments/image_kernel/data)
+#   RESULTS_ROOT      where outputs go (default results/)
+#   SKIP_TORUS=1      skip Section 5.3, whose minimum kernel takes days on a CPU
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DATA_ROOT="${DATA_ROOT:-${ROOT}/data}"
 RESULTS_ROOT="${RESULTS_ROOT:-${ROOT}/results}"
-
+POINTCLOUD_DATA="${POINTCLOUD_DATA:-${ROOT}/experiments/pointcloud/data/data_3D.pkl}"
+IMAGE_DATA_DIR="${IMAGE_DATA_DIR:-${ROOT}/experiments/image_kernel/data}"
 mkdir -p "${RESULTS_ROOT}"
 
-echo "[1/4] Image/Fourier-Bessel kernel experiment"
-export PAPER_IMAGE_DATA_DIR="${PAPER_IMAGE_DATA_DIR:-${DATA_ROOT}/new_dataset_5.3.26}"
-export PAPER_IMAGE_OUTPUT_DIR="${RESULTS_ROOT}/image_kernel/new_run"
-export PAPER_IMAGE_FIGURES_DIR="${RESULTS_ROOT}/image_kernel/new_run/figures"
-mkdir -p "${PAPER_IMAGE_OUTPUT_DIR}" "${PAPER_IMAGE_FIGURES_DIR}"
-python3 "${ROOT}/experiments/image_kernel/run_final_1000.py"
-
-echo "[2/4] Point-cloud self-tuning experiment"
-python3 "${ROOT}/experiments/pointcloud_self_tuning/run_experiment.py" \
-  --data-path "${DATA_ROOT}/data_3D.pkl" \
-  --save-folder "${RESULTS_ROOT}/pointcloud_self_tuning/new_run" \
-  --save-name paper_run \
-  --num-points 200 \
-  --invariant-method invariant_features_self_tuning \
-  --movement rotation \
-  --bandwidth 1 \
-  --noise 0 \
-  --noise-tag SNR \
-  --laplacian-type RWGL \
-  --knn-k 30 \
-  --render-pdf true
-
-echo "[3/4] Double-rotation parameterization experiment"
-DOUBLE_ROTATION_INPUT_DIR="${DOUBLE_ROTATION_INPUT_DIR:-${DATA_ROOT}/roy_lederman_data/data}"
-python3 "${ROOT}/experiments/double_rotation/run_experiment.py" \
-  --input-path "${DOUBLE_ROTATION_INPUT_DIR}" \
-  --n-images 5000 \
-  --output-dir "${RESULTS_ROOT}/double_rotation/new_run" \
-  --t 10 \
-  --num-neighbors 20 \
-  --num-rotations 300
-
-echo "[4/4] SO(3)/SO(2) convergence experiment"
+echo "[1/4] Section 3.5: SO(3)/SO(2) convergence (Figure 2)"
 export PAPER_EXP3_OUTPUT_DIR="${RESULTS_ROOT}/so3_so2_convergence/new_run"
 mkdir -p "${PAPER_EXP3_OUTPUT_DIR}"
 python3 "${ROOT}/experiments/so3_so2_convergence/converges_so3_so2_exp_journal_gpu.py"
 
-echo "[done] Submission experiments completed."
+echo "[2/4] Section 5.1: 3D point clouds (Figure 4)"
+DATA="${POINTCLOUD_DATA}" OUT="${RESULTS_ROOT}/pointcloud/figure4/new_run" \
+  bash "${ROOT}/experiments/pointcloud/run_all.sh"
+
+echo "[3/4] Section 5.2: tomographic images (Figure 5)"
+DATA="${IMAGE_DATA_DIR}" OUT="${RESULTS_ROOT}/image_kernel/figure5/new_run" \
+  bash "${ROOT}/experiments/image_kernel/run_all.sh"
+
+if [ "${SKIP_TORUS:-0}" = 1 ]; then
+  echo "[4/4] Section 5.3: skipped (SKIP_TORUS=1)"
+else
+  echo "[4/4] Section 5.3: two spinning objects (Figure 7)"
+  (cd "${ROOT}/experiments/torus_double_rotation" && \
+    OUT="${RESULTS_ROOT}/torus_double_rotation/new_run" INTEGRAL=1 bash run_all.sh)
+fi
+
+echo "[done] all experiments completed."

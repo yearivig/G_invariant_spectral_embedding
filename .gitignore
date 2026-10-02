@@ -2,12 +2,14 @@ __pycache__/
 *.py[cod]
 *.log
 *.pkl
+.venv/
 
 # External/raw datasets are documented but not committed.
-data/data_3D.pkl
-data/new_dataset_5.3.26/
-projection_data/
-newest_dataset/
+experiments/pointcloud/data/*
+experiments/image_kernel/data/*
+!experiments/*/data/README.md
+experiments/torus_double_rotation/data/
 
 # Local rerun outputs.
 results/**/new_run/
+experiments/*/results/
