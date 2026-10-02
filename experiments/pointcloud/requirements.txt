@@ -1,0 +1,4 @@
+numpy
+scipy
+matplotlib
+# the scatter plots use LaTeX text rendering (text.usetex): a LaTeX installation is needed

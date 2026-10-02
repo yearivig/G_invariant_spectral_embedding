@@ -1,15 +1,12 @@
 """
-Render `.pkl` experiment outputs into clean `.pdf` scatter plots.
+Render saved embeddings (.pkl) as the axis-free scatter plots of Figure 4.
 
-This is a documented variant of `print_plots/print_from_pkl.py`.
+A .pkl holds [phi_1, phi_2, ...]; the first two coordinates are plotted. Point i
+is coloured by sin(pi (i mod 126) / 126), a function of its frame index, with
+matplotlib's "rainbow" map, as in the paper. Figures use LaTeX text rendering
+(text.usetex), so a LaTeX installation is needed.
 
-Convention used in this codebase:
-- experiment scripts save embeddings as `outputs/<name>....pkl`
-- this module converts them into `outputs/new_plots/<same-name>.pdf`
-
-The `.pkl` file format used here is a NumPy array/list containing:
-    data[0] = x coordinates
-    data[1] = y coordinates
+    python3 tools/plot_embedding.py results/figure4      # every .pkl there -> results/figure4/new_plots/
 """
 
 from __future__ import annotations
@@ -17,7 +14,6 @@ from __future__ import annotations
 import os
 import pickle
 from pathlib import Path
-from typing import Iterable
 
 import matplotlib
 import numpy as np
@@ -120,8 +116,9 @@ def render_all_pkls_in_directory(outputs_dir: str | os.PathLike) -> list[Path]:
 
 
 if __name__ == "__main__":
-    # Convenience: render everything under the default project outputs dir.
-    default_outputs = Path(__file__).resolve().parents[1] / "outputs"
-    pdfs = render_all_pkls_in_directory(default_outputs)
-    print(f"Rendered {len(pdfs)} PDFs into {default_outputs / 'new_plots'}")
+    import sys
 
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    pdfs = render_all_pkls_in_directory(sys.argv[1])
+    print(f"Rendered {len(pdfs)} PDFs into {Path(sys.argv[1]) / 'new_plots'}")
