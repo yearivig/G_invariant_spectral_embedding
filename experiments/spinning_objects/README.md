@@ -37,10 +37,12 @@ $m$ smallest nonzero eigenvalues. The kernels are
 
 with $R$ over $N = 300$ equally spaced rotations by default
 (`--num-group-elements`); for the integral kernel that is the uniform
-trapezoidal rule on the circle. The bandwidth is `--epsilon`: a fixed value, as
-in the paper, or `knn` (the default here), which sets
-$\varepsilon = (\text{mean distance to the 20 nearest neighbours})^2$ per
-kernel and records it in `run_config.json`. The minimum kernel's squared
+trapezoidal rule on the circle. The bandwidth is `--epsilon`: a fixed value, or
+`knn` (the default), which sets
+$\varepsilon = (\text{mean Euclidean distance to the 20 nearest neighbours})^2$
+once, from the rotated images, and uses it for all three kernels, so the
+invariant kernels get no help from alignment in choosing it. The value is
+recorded in `run_config.json`. The minimum kernel's squared
 distances are saved, so it can be re-embedded with another $\varepsilon$ in
 seconds.
 
@@ -68,8 +70,7 @@ the Euclidean, minimum and integral kernels; `INTEGRAL=0 bash run_all.sh`
 skips the integral kernel, about halving the run time. The minimum kernel's
 distances are saved (`results/run1/so2_min_sq_distances.npy`), so running
 `bash run_all.sh` again after an `INTEGRAL=0` run computes only the integral
-kernel: the minimum kernel is re-embedded from the saved file in seconds, and
-the integral kernel uses the same nearest-neighbour $\varepsilon$. The file is refused if it came from a
+kernel: the minimum kernel is re-embedded from the saved file in seconds. The file is refused if it came from a
 different dataset or number of group elements; delete it to recompute. If
 `data/coil-pair/` is already present the download is skipped; if
 `data/rotated_torus_dataset/` came with the folder, only step 4 is needed to

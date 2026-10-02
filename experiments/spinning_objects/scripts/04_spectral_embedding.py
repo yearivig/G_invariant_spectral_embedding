@@ -20,11 +20,11 @@ Kernels, with bandwidth epsilon:
   integral   mean_R exp(-||x - R y||^2 / epsilon)      Eq. (9)   unless --no-integral
 R runs over --num-group-elements equally spaced rotations (default 300).
 
---epsilon sets the bandwidth for every kernel (the paper fixes it per
-experiment). The default "knn" sets it per kernel to (mean distance to the
---num-neighbors nearest neighbours)^2, computed from that kernel's own
-distances (the integral kernel uses the SO(2)-minimum distances). The value
-used is recorded in run_config.json.
+--epsilon sets one bandwidth for every kernel. The default "knn" sets it to
+(mean Euclidean distance to the --num-neighbors nearest neighbours)^2, computed
+once from the rotated images and used by all three kernels: the invariant
+kernels get the same bandwidth as the Euclidean one, with no alignment used to
+choose it. The value is recorded in run_config.json.
 
 Outputs in --out:
   <name>_eigenvectors.pkl   (m, n): row k-1 is phi_k
@@ -55,8 +55,7 @@ Adding the integral kernel to a --no-integral run, without recomputing the minim
         --integral --min-distances results/run1/so2_min_sq_distances.npy
 
 --min-distances reuses the saved minimum distances: the minimum kernel is
-re-embedded from them in seconds, and the integral kernel's "knn" epsilon comes
-from them exactly as in the first run. The file is refused unless it was made
+re-embedded from them in seconds. The file is refused unless it was made
 from the same dataset (same labels.csv), number of images and number of group
 elements. run_config.json is updated, not replaced, so earlier kernels'
 entries are kept.
@@ -99,7 +98,7 @@ def main() -> None:
     ap.add_argument("--n-images", type=int, default=None, help="default: all of them")
     ap.add_argument("--m", type=int, default=20, help="number of eigenvectors phi_1..phi_m to keep")
     ap.add_argument("--epsilon", default="knn",
-                    help="kernel bandwidth for every kernel, or 'knn' (default) to set it per kernel")
+                    help="kernel bandwidth for every kernel, or 'knn' (default): the Euclidean nearest-neighbour value for all")
     ap.add_argument("--num-neighbors", type=int, default=20, help="k for the 'knn' bandwidth rule")
     ap.add_argument("--num-group-elements", "--num-rotations", dest="num_group_elements", type=int,
                     default=300, help="SO(2) elements for the minimum and integral kernels (default 300)")
@@ -155,7 +154,7 @@ def main() -> None:
         print(f"reusing  {args.min_distances} (made from {meta['dataset']})")
 
     side = layout["final_side"]
-    need_min_pass = min_d2 is None and (not args.no_min or (args.integral and epsilon == "knn"))
+    need_min_pass = min_d2 is None and not args.no_min
     passes = (1 if need_min_pass else 0) + (1 if args.integral else 0)
     work = (n * n / 2) * args.num_group_elements * side * side * passes
     print(f"dataset  {img_dir}  ({available} images, {side}x{side}, prefix '{prefix}')")
@@ -191,14 +190,15 @@ def main() -> None:
     logger.info("[2/3] spectral embedding (Algorithm 1)")
     kernels = ["euclidean"] + ([] if args.no_min else ["min"]) + (["integral"] if args.integral else [])
     results = {}
-    for kernel in kernels:
+    for kernel in kernels:                     # Euclidean first: under "knn" its bandwidth is everyone's
         t0 = time.time()
-        reuse = min_d2 if kernel in ("min", "integral") else None
+        reuse = min_d2 if kernel == "min" else None
+        eps_k = epsilon if kernel == "euclidean" or epsilon != "knn" else results["euclidean"]["epsilon"]
         res = spectral_embedding.embed(kernel, images.reshape(n, -1) if kernel == "euclidean" else images, args.m,
-                             epsilon=epsilon, num_group_elements=args.num_group_elements,
+                             epsilon=eps_k, num_group_elements=args.num_group_elements,
                              num_neighbors=args.num_neighbors, device=args.device, sq_dists=reuse)
         logger.info(f"  {kernel}: done in {time.time() - t0:.1f}s, epsilon = {res['epsilon']:.6g}")
-        if kernel == "min" or (kernel == "integral" and min_d2 is None and res["sq_dists"] is not None):
+        if kernel == "min":
             computed = min_d2 is None
             min_d2 = res["sq_dists"]
             target = out / "so2_min_sq_distances.npy"
@@ -226,7 +226,7 @@ def main() -> None:
         elif kernel == "euclidean":
             eps_source = "knn on Euclidean distances"
         else:
-            eps_source = "knn on SO(2)-minimum distances" + (f" from {args.min_distances}" if args.min_distances else "")
+            eps_source = "the Euclidean kernel's (knn on Euclidean distances)"
         summary[kernel] = {"epsilon": res["epsilon"], "epsilon_source": eps_source, "eigenvalues_1_4": [round(float(x), 6) for x in res["eigenvalues"][1:5]],
                            "pairs": [[i + 1, j + 1] for _, i, j in test["pairs"]],
                            "scores": [round(s, 4) for s, _, _ in test["pairs"]],

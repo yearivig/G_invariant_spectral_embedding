@@ -25,7 +25,7 @@ BG=${BG:-auto}               # COIL background -> black; 'none' to keep it grey
 SEED=${SEED:-3044084360}     # rotation angles; this one gives the published set
 ROTATIONS=${ROTATIONS:-300}  # SO(2) group elements for the invariant kernels (script 04's default)
 NEIGHBORS=${NEIGHBORS:-20}   # k for the nearest-neighbour bandwidth rule
-EPSILON=${EPSILON:-knn}      # kernel bandwidth: a number, or knn
+EPSILON=${EPSILON:-knn}      # kernel bandwidth: a number, or knn (the Euclidean nearest-neighbour value, for all kernels)
 INTEGRAL=${INTEGRAL:-1}      # 1 = Euclidean, minimum and SO(2) integral kernels; 0 = skip the integral
                              # kernel (about halves the run time). A later INTEGRAL=1 run reuses
                              # $OUT/so2_min_sq_distances.npy, so the minimum kernel is not recomputed;
