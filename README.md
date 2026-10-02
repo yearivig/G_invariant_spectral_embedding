@@ -43,6 +43,6 @@ bash experiments/image_kernel/run_all.sh                                        
 (cd experiments/torus_double_rotation && bash run_all.sh)                       # Figure 7 (long; see its README)
 ```
 
-`results/` holds outputs committed earlier. Those for Sections 5.1 and 5.2
-were produced by the code before its fixes to Algorithm 1 (described in each
-folder's README) and will change when the experiments are rerun.
+`results/` holds the committed outputs of Section 3.5. The earlier outputs of
+Sections 5.1 and 5.2 were removed, since they came from the code before its
+fixes to Algorithm 1; rerunning the experiments regenerates them.
