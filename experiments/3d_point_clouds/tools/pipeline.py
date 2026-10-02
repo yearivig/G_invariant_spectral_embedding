@@ -6,8 +6,9 @@ plots the first two), named as the files of Figure 4:
 
   <name>_NOP:<n>_IM:<kernel>_M:rotation_BW:<eps>_IC:<bool>_AS:<bool>_<tag>:<noise>_LT:RWGL.pkl
 
-with "_MIN:kabsch" and/or "_G:<rotations>" appended when those differ from the
-defaults (grid, 600), so default runs keep the paper's names. A .json with the
+with "_MIN:kabsch", "_G:<rotations>" and/or "_P:<points>" appended when those
+differ from the defaults (grid, 600, rotation), so default runs keep the
+paper's names. A .json with the
 same stem records every setting, the seed and lambda_0..lambda_m.
 """
 
@@ -38,6 +39,7 @@ class ExperimentConfig:
     min_method: str = "grid"             # grid or kabsch, minimum kernel only
     num_rotations: int = kernels.NUM_ROTATIONS
     seed: int = 0
+    points: str = "rotation"             # which points of each frame: rotation (800 onward) or all
     m: int = 2                           # embedding dimension
     save_folder: str = "results"
     save_name: str = "run"
@@ -51,6 +53,8 @@ def output_stem(cfg: ExperimentConfig) -> Path:
     if cfg.kernel in ("min", "integral") and not (cfg.kernel == "min" and cfg.min_method == "kabsch") \
             and cfg.num_rotations != kernels.NUM_ROTATIONS:
         stem += f"_G:{cfg.num_rotations}"
+    if cfg.points != "rotation":
+        stem += f"_P:{cfg.points}"
     return Path(cfg.save_folder) / stem
 
 
@@ -60,7 +64,8 @@ def run_experiment(cfg: ExperimentConfig, trajectory: np.ndarray | None = None) 
         trajectory = pointclouds.load_trajectory(cfg.data_path)
     rng = np.random.default_rng(cfg.seed)
     X = pointclouds.make_point_clouds(trajectory, cfg.num_points, centered=cfg.is_centered,
-                                      add_stationary=cfg.add_stationary, snr_db=cfg.snr_db, rng=rng)
+                                      add_stationary=cfg.add_stationary, snr_db=cfg.snr_db, rng=rng,
+                                      points=cfg.points)
     W = kernels.weight_matrix(X, cfg.kernel, cfg.bandwidth, min_method=cfg.min_method,
                               num_rotations=cfg.num_rotations)
     phi, lam = spectral_embedding(W, cfg.m)

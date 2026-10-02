@@ -42,6 +42,8 @@ def main() -> None:
     ap.add_argument("--num-rotations", type=int, default=kernels.NUM_ROTATIONS,
                     help="size of the SO(3) grid for min (grid) and integral (default 600)")
     ap.add_argument("--seed", type=int, default=0, help="seed for the stationary points, noise and rotations")
+    ap.add_argument("--points", choices=["rotation", "all"], default="rotation",
+                    help="points of each frame: rotation = 800 onward, 303 points (default, as in Figure 4); all = 1103")
     ap.add_argument("--m", type=int, default=2, help="embedding dimension (default 2)")
     ap.add_argument("--no-pdf", action="store_true", help="do not render the scatter plot")
     args = ap.parse_args()
@@ -49,7 +51,7 @@ def main() -> None:
     cfg = ExperimentConfig(data_path=args.data_path, num_points=args.num_points, kernel=args.kernel,
                            bandwidth=args.bandwidth, is_centered=args.is_centered,
                            add_stationary=args.add_stationary, snr_db=args.snr, noise_tag=args.noise_tag,
-                           min_method=args.min_method, num_rotations=args.num_rotations, seed=args.seed,
+                           min_method=args.min_method, num_rotations=args.num_rotations, seed=args.seed, points=args.points,
                            m=args.m, save_folder=args.save_folder, save_name=args.save_name)
     pkl = run_experiment(cfg)
     print(f"saved {pkl}")

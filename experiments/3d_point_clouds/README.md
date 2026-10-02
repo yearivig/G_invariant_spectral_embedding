@@ -28,8 +28,11 @@ bash run_all.sh                                   # all 24 panels of Figure 4 ->
 
 ### The point clouds
 
-Frame $i$ of the trajectory (atoms 800 onward, the rotation movement), for the
-first $n$ frames, then in this order: optional centring (`--is-centered`, IC);
+Frame $i$ of the trajectory, for the first $n$ frames, restricted to the points
+chosen by `--points`: `rotation` (default, as in Figure 4) keeps points 800
+onward, the part of the file that rotates (303 of the 1103 points of each
+frame); `all` keeps all 1103, including the (nearly) static part. Then, in this
+order: optional centring (`--is-centered`, IC);
 optionally 80 "stationary" points appended (`--add-stationary`, AS), one draw
 from $\mathcal N(c, 0.2^2 I_3)$ with $c$ the centroid of the first cloud, the
 same 80 points in every cloud; optional Gaussian noise at an SNR in dB

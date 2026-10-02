@@ -7,8 +7,10 @@ The trajectory is a pickle of shape (num_frames, num_atoms, 3) (data/data_3D.pkl
 not public). Each sample is built in this order, as in the code that produced
 Figure 4 of the paper:
 
-  1. frame i of the trajectory, atoms ROTATION_ATOMS (800 onward: the part of the
-     file holding the rotation movement), for the first num_samples frames;
+  1. frame i of the trajectory, for the first num_samples frames, restricted to
+     the points POINT_SETS[points]: "rotation" (default, as in Figure 4) keeps
+     points 800 onward, the part of the file that rotates (303 of the 1103
+     points of each frame); "all" keeps all 1103;
   2. optionally centred (IC in the output filenames);
   3. optionally 80 "stationary" points appended (AS): one draw from
      N(c, 0.2^2 I_3), c the centroid of the first cloud, the same 80 points in
@@ -29,7 +31,7 @@ import pickle
 import numpy as np
 from scipy.stats import special_ortho_group
 
-ROTATION_ATOMS = slice(800, None)
+POINT_SETS = {"rotation": slice(800, None), "all": slice(None)}
 NUM_STATIONARY = 80
 STATIONARY_SCALE = 0.2
 
@@ -42,10 +44,10 @@ def load_trajectory(path: str) -> np.ndarray:
 
 def make_point_clouds(trajectory: np.ndarray, num_samples: int, *, centered: bool = False,
                       add_stationary: bool = False, snr_db: float | None = None,
-                      rng: np.random.Generator | None = None) -> np.ndarray:
+                      rng: np.random.Generator | None = None, points: str = "rotation") -> np.ndarray:
     """The randomly rotated point clouds (num_samples, num_points, 3); see the module docstring."""
     rng = np.random.default_rng() if rng is None else rng
-    data = np.array(trajectory[:num_samples, ROTATION_ATOMS, :], dtype=np.float64)
+    data = np.array(trajectory[:num_samples, POINT_SETS[points], :], dtype=np.float64)
     if len(data) < num_samples:
         raise ValueError(f"the trajectory has {len(data)} frames, {num_samples} requested")
 

@@ -62,6 +62,8 @@ def main() -> None:
     ap.add_argument("--min-method", choices=["grid", "kabsch"], default="grid")
     ap.add_argument("--num-rotations", type=int, default=kernels.NUM_ROTATIONS)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--points", choices=["rotation", "all"], default="rotation",
+                    help="points of each frame: rotation = 800 onward, 303 points (default, as in Figure 4); all = 1103")
     ap.add_argument("--no-pdf", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="list the panels and stop")
     args = ap.parse_args()
@@ -75,7 +77,7 @@ def main() -> None:
             data_path=args.data_path, num_points=n, kernel=kernel, bandwidth=BANDWIDTH[kernel],
             is_centered=ic if ic_all is None else ic_all, add_stationary=add if as_all is None else as_all,
             snr_db=args.snr if snr else 0.0, noise_tag=tag, min_method=args.min_method,
-            num_rotations=args.num_rotations, seed=args.seed, save_folder=args.save_folder,
+            num_rotations=args.num_rotations, seed=args.seed, points=args.points, save_folder=args.save_folder,
             save_name=args.save_name))
 
     for cfg in configs:
