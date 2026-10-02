@@ -55,7 +55,7 @@ seconds.
 ## Quick start
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
+python3.12 -m venv .venv && source .venv/bin/activate    # Python 3.12 recommended; 3.14 also tested
 pip install -r requirements.txt        # or requirements-lock.txt for the exact versions used
 bash run_all.sh
 ```
@@ -240,9 +240,12 @@ magnitude.
 
 `requirements.txt` lists the packages unpinned; `requirements-lock.txt` pins
 the exact versions the published dataset was built with (Python 3.14). The
-images are integer PNGs, so rebuilding them is insensitive to minor version
-drift, but the embeddings are floating point and are best compared under the
-locked versions.
+same versions install on Python 3.12, the recommended version: on 3.12.1 the
+dataset rebuilds byte-identically (every PNG and `labels.csv`) and the
+embeddings are bit-identical to 3.14 (minimum kernel from the saved distances,
+all 5184 images; Euclidean kernel, first 1000). The images are integer PNGs,
+so rebuilding them is insensitive to minor version drift, but the embeddings
+are floating point and are best compared under the locked versions.
 
 ## Sources
 
