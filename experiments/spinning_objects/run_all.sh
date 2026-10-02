@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end run, from COIL-100 to the embeddings: bash run_all.sh
+# End-to-end run, from COIL-100 to the embeddings and the Figure 7 panels: bash run_all.sh
 #
 # Defaults reproduce the published dataset exactly: COIL objects 87 (left)
 # and 72 (right), all 72 x 72 poses, COIL background mapped to black, one
@@ -26,9 +26,10 @@ SEED=${SEED:-3044084360}     # rotation angles; this one gives the published set
 ROTATIONS=${ROTATIONS:-300}  # SO(2) group elements for the invariant kernels (script 04's default)
 NEIGHBORS=${NEIGHBORS:-20}   # k for the nearest-neighbour bandwidth rule
 EPSILON=${EPSILON:-knn}      # kernel bandwidth: a number, or knn
-INTEGRAL=${INTEGRAL:-0}      # 0 = Euclidean + minimum; 1 = also the SO(2) integral kernel (about doubles the run time)
-                             # A later INTEGRAL=1 run reuses $OUT/so2_min_sq_distances.npy, so the
-                             # minimum kernel is not recomputed; delete that file to force it.
+INTEGRAL=${INTEGRAL:-1}      # 1 = Euclidean, minimum and SO(2) integral kernels; 0 = skip the integral
+                             # kernel (about halves the run time). A later INTEGRAL=1 run reuses
+                             # $OUT/so2_min_sq_distances.npy, so the minimum kernel is not recomputed;
+                             # delete that file to force it.
 FORCE=${FORCE:-0}            # 1 = rebuild both datasets even if they are complete
 
 
@@ -75,7 +76,7 @@ echo
 echo "== steps 4-5: kernels, embeddings, plots =="
 # ${arr[@]+...}: macOS ships bash 3.2, where an empty array under set -u is an error.
 EXTRA_ARGS=()
-if [ "$INTEGRAL" = 1 ]; then EXTRA_ARGS+=(--integral); fi
+if [ "$INTEGRAL" = 1 ]; then EXTRA_ARGS+=(--integral); else EXTRA_ARGS+=(--no-integral); fi
 if [ -f "$OUT/so2_min_sq_distances.npy" ]; then
   echo "   reusing the minimum-kernel distances in $OUT/so2_min_sq_distances.npy"
   EXTRA_ARGS+=(--min-distances "$OUT/so2_min_sq_distances.npy")
@@ -84,3 +85,11 @@ python3 scripts/04_spectral_embedding.py \
     --dataset "$ROTATED" --out "$OUT" \
     --num-group-elements "$ROTATIONS" --epsilon "$EPSILON" --num-neighbors "$NEIGHBORS" \
     ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
+
+echo
+if [ -f "$OUT/so2_min_eigenvectors.pkl" ] && [ -f "$OUT/so2_integral_eigenvectors.pkl" ]; then
+  echo "== step 6: Figure 7 panels =="
+  python3 scripts/05_figure7.py --run "$OUT"
+else
+  echo "== step 6: skipped, Figure 7 needs the minimum and integral kernels (run with INTEGRAL=1) =="
+fi

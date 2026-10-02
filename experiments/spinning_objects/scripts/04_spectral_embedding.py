@@ -17,7 +17,7 @@ Embedding (arXiv:2607.08987), implemented in tools/spectral_embedding.py:
 Kernels, with bandwidth epsilon:
   euclidean  exp(-||x - y||^2 / epsilon)                         always
   min        exp(-min_R ||x - R y||^2 / epsilon)       Eq. (8)   unless --no-min
-  integral   mean_R exp(-||x - R y||^2 / epsilon)      Eq. (9)   with --integral
+  integral   mean_R exp(-||x - R y||^2 / epsilon)      Eq. (9)   unless --no-integral
 R runs over --num-group-elements equally spaced rotations (default 300).
 
 --epsilon sets the bandwidth for every kernel (the paper fixes it per
@@ -46,10 +46,10 @@ labels.csv are used only for colour.
 Usage
 -----
     python3 scripts/04_spectral_embedding.py --dataset data/rotated_torus_dataset --out results/run1
-    python3 scripts/04_spectral_embedding.py ... --no-min          # Euclidean only, ~1 minute
+    python3 scripts/04_spectral_embedding.py ... --no-min --no-integral   # Euclidean only, ~1 minute
     python3 scripts/04_spectral_embedding.py ... --epsilon 0.005   # fixed bandwidth
 
-Adding the integral kernel later, without recomputing the minimum kernel:
+Adding the integral kernel to a --no-integral run, without recomputing the minimum kernel:
 
     python3 scripts/04_spectral_embedding.py --dataset data/rotated_torus_dataset --out results/run1 \
         --integral --min-distances results/run1/so2_min_sq_distances.npy
@@ -103,9 +103,10 @@ def main() -> None:
     ap.add_argument("--num-neighbors", type=int, default=20, help="k for the 'knn' bandwidth rule")
     ap.add_argument("--num-group-elements", "--num-rotations", dest="num_group_elements", type=int,
                     default=300, help="SO(2) elements for the minimum and integral kernels (default 300)")
-    ap.add_argument("--integral", action="store_true", help="also compute the SO(2) integral kernel")
+    ap.add_argument("--integral", action=argparse.BooleanOptionalAction, default=True,
+                    help="compute the SO(2) integral kernel (default: on; --no-integral to skip it)")
     ap.add_argument("--no-min", action="store_true",
-                    help="skip the SO(2) minimum kernel: Euclidean only (plus --integral if given)")
+                    help="skip the SO(2) minimum kernel (the integral kernel still runs unless --no-integral)")
     ap.add_argument("--min-distances", type=Path, default=None,
                     help="reuse a saved so2_min_sq_distances.npy instead of recomputing the minimum distances")
     ap.add_argument("--device", default=None, help="torch device, e.g. cuda:0 (default: auto)")

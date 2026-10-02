@@ -20,6 +20,7 @@ angles set independently.
 | 3. random SO(2) rotation of every complete image | `scripts/03_rotate_dataset.py` | `rotations.rotate_image` |
 | 4. spectral embedding (Algorithm 1) with the Euclidean, minimum and integral kernels | `scripts/04_spectral_embedding.py` | `spectral_embedding.embed` |
 | 5. save results, stereographic and donut figures per kernel | `scripts/04_spectral_embedding.py` | `tools/view_stereo.py` |
+| 6. the panels of Figure 7 in the paper | `scripts/05_figure7.py` | `tools/view_stereo.py` |
 
 The embedding follows **Algorithm 1 of the paper**. For each kernel $K$,
 `tools/spectral_embedding.py` builds
@@ -32,7 +33,7 @@ $m$ smallest nonzero eigenvalues. The kernels are
 |---|---|---|
 | Euclidean | $\exp(-\lVert x-y\rVert^2/\varepsilon)$ | always |
 | minimum | $\exp(-\min_{R}\lVert x-R\cdot y\rVert^2/\varepsilon)$ | Eq. (8), unless `--no-min` |
-| integral | $\frac{1}{N}\sum_{R}\exp(-\lVert x-R\cdot y\rVert^2/\varepsilon)$ | Eq. (9), with `--integral` |
+| integral | $\frac{1}{N}\sum_{R}\exp(-\lVert x-R\cdot y\rVert^2/\varepsilon)$ | Eq. (9), unless `--no-integral` |
 
 with $R$ over $N = 300$ equally spaced rotations by default
 (`--num-group-elements`); for the integral kernel that is the uniform
@@ -49,8 +50,8 @@ seconds.
 |---|---|---|
 | `tools/spectral_embedding.py` | written for this project: Algorithm 1 and the three kernels | script 04 |
 | `tools/rotations.py` | adapted from Roy Lederman's `roy_lederman_data/rotations.py` | script 03, `tools/spectral_embedding.py` |
-| `tools/view_stereo.py` | written for this project | script 04, and by hand |
-| `scripts/01`–`04`, `run_all.sh` | written for this project | |
+| `tools/view_stereo.py` | written for this project | scripts 04 and 05, and by hand |
+| `scripts/01`–`05`, `run_all.sh` | written for this project | |
 
 ## Quick start
 
@@ -63,12 +64,12 @@ bash run_all.sh
 `run_all.sh` runs every step below. Its defaults reproduce the published
 dataset exactly — the rotation seed is fixed — and any setting can be
 overridden from the environment (`ROTATIONS=72 bash run_all.sh`). It runs
-the Euclidean and minimum kernels; `INTEGRAL=1 bash run_all.sh` adds the
-integral kernel. The minimum kernel's distances are saved
-(`results/run1/so2_min_sq_distances.npy`), so running `INTEGRAL=1 bash run_all.sh`
-after a first run computes only the integral kernel: the minimum kernel is
-re-embedded from the saved file in seconds, and the integral kernel uses the
-same nearest-neighbour $\varepsilon$. The file is refused if it came from a
+the Euclidean, minimum and integral kernels; `INTEGRAL=0 bash run_all.sh`
+skips the integral kernel, about halving the run time. The minimum kernel's
+distances are saved (`results/run1/so2_min_sq_distances.npy`), so running
+`bash run_all.sh` again after an `INTEGRAL=0` run computes only the integral
+kernel: the minimum kernel is re-embedded from the saved file in seconds, and
+the integral kernel uses the same nearest-neighbour $\varepsilon$. The file is refused if it came from a
 different dataset or number of group elements; delete it to recompute. If
 `data/coil-pair/` is already present the download is skipped; if
 `data/rotated_torus_dataset/` came with the folder, only step 4 is needed to
@@ -89,9 +90,12 @@ python3 scripts/02_build_dataset.py \
 python3 scripts/03_rotate_dataset.py --dataset data/torus_dataset \
     --out data/rotated_torus_dataset --seed 3044084360
 
-# 4-5. kernels, embeddings, plots (Euclidean and minimum; add --integral for the integral kernel)
+# 4-5. kernels, embeddings, plots (Euclidean, minimum and integral; --no-integral to skip the last)
 python3 scripts/04_spectral_embedding.py \
     --dataset data/rotated_torus_dataset --out results/run1 --num-group-elements 300
+
+# 6. the Figure 7 panels, from the three kernels' eigenvectors (seconds)
+python3 scripts/05_figure7.py --run results/run1      # writes results/run1/figure7/
 ```
 
 `--dry-run` on script 04 validates the dataset and prints the cost estimate
@@ -99,8 +103,9 @@ without starting. At the full 5184 images and 308×308 this is a long run on a
 CPU. Each invariant kernel compares every pair under 300 rotations by default
 (script 04's own default, and `run_all.sh`'s): about 4e14 element-operations
 per kernel, measured at roughly two days on an Apple M2 for the minimum kernel
-(about 12 hours at 72 angles). The integral kernel, if added, costs about the
-same again, so with both it is roughly four days on that laptop. The rotated images alone
+(about 12 hours at 72 angles). The integral kernel costs about the same again,
+so the default run is roughly four days on that laptop (two with
+`--no-integral`). The rotated images alone
 take ~2 GB of memory. A GPU changes all of this by about two orders of
 magnitude.
 
@@ -192,6 +197,24 @@ Neither check says which variable a circle belongs to; the colouring does.
 In the donut figure the shape comes from the formula, so only the colours are
 evidence there. The stereographic figure's shape comes from the eigenvectors.
 
+### Figure 7
+
+`scripts/05_figure7.py` draws the panels of Figure 7 from a script-04 run that
+has all three kernels: for each of the minimum, integral and Euclidean kernels,
+one image coloured by $\theta_A$ and one by $\theta_B$, each holding the top and
+side stereographic views side by side, plus the two colour bars as separate
+images. They carry no labels or titles (LaTeX sets those), and each panel is
+cropped to its ink vertically with a 24 px margin but keeps its full width, so
+all panels share one horizontal scale at the same width in LaTeX:
+
+```
+results/run1/figure7/stereo_{min,integral,euclidean}_theta{A,B}.png
+results/run1/figure7/stereo_colorbar_theta{A,B}.png
+```
+
+On the run behind the paper the script reproduces all eight images pixel for
+pixel.
+
 To rotate a figure by hand:
 
 ```bash
@@ -200,8 +223,9 @@ python3 tools/view_stereo.py --color B          # coloured by theta_B
 python3 tools/view_stereo.py --kernel euclidean --style donut
 ```
 
-For a quick check of a new pair or setting without the minimum kernel, run
-script 04 with `--no-min` (Euclidean only, about 30 seconds for 5184 images).
+For a quick check of a new pair or setting without the invariant kernels, run
+script 04 with `--no-min --no-integral` (Euclidean only, about 30 seconds for
+5184 images).
 On the *unrotated* dataset that gives the structure the minimum kernel can at
 best recover.
 
@@ -209,11 +233,12 @@ best recover.
 ## Files
 
 ```
-run_all.sh                         steps 1-5 end to end, reproducing the published dataset
+run_all.sh                         steps 1-6 end to end, reproducing the published dataset
 scripts/01_fetch_coil100.py        step 1: download COIL-100, keep obj87 + obj72 in data/coil-pair
 scripts/02_build_dataset.py        step 2: the 72 x 72 composites
 scripts/03_rotate_dataset.py       step 3: one random SO(2) rotation per image
 scripts/04_spectral_embedding.py   steps 4-5: Algorithm 1 for each kernel, torus figures
+scripts/05_figure7.py              step 6: the panels of Figure 7
 tools/spectral_embedding.py        Algorithm 1 with the Euclidean, minimum and integral kernels
 tools/rotations.py                 SO(2) image rotation (adapted from Roy Lederman's code)
 tools/view_stereo.py               the four torus coordinates in 3D, without labels
