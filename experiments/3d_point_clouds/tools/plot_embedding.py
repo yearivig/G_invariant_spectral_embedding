@@ -7,7 +7,7 @@ is coloured by sin(pi (i mod 126) / 126), a function of its frame index, with
 matplotlib's "rainbow" map, as in the paper. Figures use LaTeX text rendering
 (text.usetex), so a LaTeX installation is needed.
 
-    python3 tools/plot_embedding.py results/figure4      # every .pkl there -> results/figure4/new_plots/
+    python3 tools/plot_embedding.py results/figure4      # results/figure4/embeddings/*.pkl -> results/figure4/plots/
 """
 
 from __future__ import annotations
@@ -101,17 +101,17 @@ def render_2d_pkl_to_pdf(pkl_path: str | os.PathLike, pdf_dir: str | os.PathLike
 
 def render_all_pkls_in_directory(outputs_dir: str | os.PathLike) -> list[Path]:
     """
-    Convert every `.pkl` file in `outputs_dir` into a PDF inside `outputs_dir/new_plots/`.
+    Convert every `.pkl` file in `outputs_dir/embeddings/` into a PDF inside `outputs_dir/plots/`.
     Returns a list of generated PDF paths.
     """
     outputs_dir = Path(outputs_dir)
     if not outputs_dir.is_dir():
         raise FileNotFoundError(f"Directory does not exist: {outputs_dir}")
 
-    pdf_dir = outputs_dir / "new_plots"
+    pdf_dir = outputs_dir / "plots"
     generated: list[Path] = []
 
-    for pkl_path in sorted(outputs_dir.glob("*.pkl")):
+    for pkl_path in sorted((outputs_dir / "embeddings").glob("*.pkl")):
         generated.append(render_2d_pkl_to_pdf(pkl_path, pdf_dir))
 
     return generated
@@ -123,4 +123,4 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     pdfs = render_all_pkls_in_directory(sys.argv[1])
-    print(f"Rendered {len(pdfs)} PDFs into {Path(sys.argv[1]) / 'new_plots'}")
+    print(f"Rendered {len(pdfs)} PDFs into {Path(sys.argv[1]) / 'plots'}")

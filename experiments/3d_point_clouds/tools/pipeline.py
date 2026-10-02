@@ -9,7 +9,8 @@ plots the first two), named as the files of Figure 4:
 with "_MIN:grid", "_G:<rotations>" and/or "_P:<points>" appended when those
 differ from the defaults (kabsch, 600, rotation), so default runs keep the
 paper's names. A .json with the
-same stem records every setting, the seed and lambda_0..lambda_m.
+same stem records every setting, the seed and lambda_0..lambda_m. Both go in
+<save_folder>/embeddings/; the plots go in <save_folder>/plots/.
 """
 
 from __future__ import annotations
@@ -24,6 +25,9 @@ import numpy as np
 import kernels
 import pointclouds
 from spectral_embedding import spectral_embedding
+
+
+EMBEDDINGS, PLOTS = "embeddings", "plots"     # subfolders of save_folder
 
 
 @dataclass(frozen=True)
@@ -55,7 +59,7 @@ def output_stem(cfg: ExperimentConfig) -> Path:
         stem += f"_G:{cfg.num_rotations}"
     if cfg.points != "rotation":
         stem += f"_P:{cfg.points}"
-    return Path(cfg.save_folder) / stem
+    return Path(cfg.save_folder) / EMBEDDINGS / stem
 
 
 def run_experiment(cfg: ExperimentConfig, trajectory: np.ndarray | None = None) -> Path:

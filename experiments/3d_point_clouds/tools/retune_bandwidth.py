@@ -75,7 +75,7 @@ def main() -> None:
         pdf = ""
         if not args.no_pdf:
             from plot_embedding import render_2d_pkl_to_pdf
-            pdf = str(render_2d_pkl_to_pdf(pkl, Path(args.save_folder) / "new_plots"))
+            pdf = str(render_2d_pkl_to_pdf(pkl, Path(args.save_folder) / "plots"))
         print(f"factor {f:g}: bandwidth {eps0 * f:.6g} -> {pkl.name}")
         rows.append((f, eps0 * f, str(pkl), pdf))
 

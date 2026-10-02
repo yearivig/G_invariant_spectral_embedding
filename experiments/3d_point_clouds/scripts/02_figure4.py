@@ -19,7 +19,7 @@ it (OLD_PAPER_IC_AS).
     python3 scripts/02_figure4.py --kernels min integral --dry-run
 
 Outputs go to --save-folder (default results/figure4): one .pkl and .json per
-panel, and the scatter plots in new_plots/.
+panel in embeddings/, and the scatter plots in plots/.
 """
 
 from __future__ import annotations
@@ -97,7 +97,7 @@ def main() -> None:
         print(f"[{k}/{len(configs)}] saved {pkl.name}")
         if not args.no_pdf:
             from plot_embedding import render_2d_pkl_to_pdf
-            render_2d_pkl_to_pdf(pkl, Path(args.save_folder) / "new_plots")
+            render_2d_pkl_to_pdf(pkl, Path(args.save_folder) / "plots")
 
 
 if __name__ == "__main__":

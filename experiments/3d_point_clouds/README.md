@@ -11,7 +11,7 @@ SO(3)-invariant kernels of Section 3.1.
 python3.12 -m venv .venv && source .venv/bin/activate     # Python 3.12 recommended; 3.14 also tested
 pip install -r requirements.txt
 # put the trajectory pickle at data/data_3D.pkl (not public; see data/README.md)
-bash run_all.sh                                   # all 24 panels of Figure 4 -> results/figure4/
+bash run_all.sh                                   # all 24 panels of Figure 4 -> results/figure4/plots/
 ```
 
 ## What runs
@@ -77,7 +77,9 @@ at 10 dB; every cloud centred with the 80 stationary points (IC and AS on);
 the minimum kernel exact (Kabsch). Files are named as in the paper's source,
 e.g. `run_NOP:400_IM:min_M:rotation_BW:47_IC:True_AS:True_AN:0_LT:RWGL.pdf`;
 `_MIN:grid` or `_G:<rotations>` is appended for non-default runs. Each panel
-also writes a `.json` with its settings and eigenvalues.
+also writes a `.json` with its settings and eigenvalues. A run folder holds
+`embeddings/` (the `.pkl` embeddings and `.json` records) and `plots/` (the
+PDFs, redrawn from the embeddings with `python3 tools/plot_embedding.py <folder>`).
 
 `--is-centered` and `--add-stationary` (`true`, `false`, `old-paper`) set IC and
 AS for every panel; `old-paper` with `--min-method grid` reproduces the

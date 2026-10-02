@@ -10,8 +10,8 @@ unless --min-method grid.
     python3 scripts/01_embed.py --kernel min --bandwidth 47 --num-points 200 --min-method grid
     python3 scripts/01_embed.py --kernel invariant_features --bandwidth 3000 --num-points 800 --snr 10
 
-Writes <save-folder>/<name>...pkl and .json (see tools/pipeline.py) and, unless
---no-pdf, the scatter plot in <save-folder>/new_plots/.
+Writes <save-folder>/embeddings/<name>...pkl and .json (see tools/pipeline.py)
+and, unless --no-pdf, the scatter plot in <save-folder>/plots/.
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ def main() -> None:
     print(f"saved {pkl}")
     if not args.no_pdf:
         from plot_embedding import render_2d_pkl_to_pdf
-        print(f"saved {render_2d_pkl_to_pdf(pkl, Path(args.save_folder) / 'new_plots')}")
+        print(f"saved {render_2d_pkl_to_pdf(pkl, Path(args.save_folder) / 'plots')}")
 
 
 if __name__ == "__main__":
