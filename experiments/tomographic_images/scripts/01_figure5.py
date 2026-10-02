@@ -18,6 +18,7 @@ min and mean (the integral kernel) at 0.005, 0.01, 0.025, 0.05; bispectrum at
 
 Outputs in --out (default results/figure5):
   figures/[snr<k>/]<kernel>_bw<eps>.pdf      scatter of (phi_1, phi_2) coloured by the torsion angle
+                                             (phi_2's sign set so a parabola opens upward; display only)
   figures/[snr<k>/]euclidean_random_angle_bw<eps>.pdf   the Euclidean embedding coloured by the applied rotation
   figures/[snr<k>/]comparison_grid.pdf        all panels of that SNR
   tabular/[snr<k>/]embedding_<tag>.csv        phi_1..phi_m, torsion angle, applied rotation per image
@@ -65,9 +66,18 @@ def load_torsion_angles(csv_path: Path, n: int) -> np.ndarray:
     return np.array([by_frame[i] for i in range(n)])
 
 
+def opens_up(phi1, phi2):
+    """phi2 with its sign chosen so that a parabola-shaped embedding opens upward.
+
+    Eigenvector signs are arbitrary; this fixes phi2's for display only, without
+    labels: phi2 is negated when it decreases with (phi1 - mean phi1)^2.
+    """
+    return -phi2 if np.dot(phi2 - phi2.mean(), (phi1 - phi1.mean()) ** 2) < 0 else phi2
+
+
 def scatter(ax, phi, colour, units):
     import matplotlib.pyplot as plt  # noqa: F401
-    x, y = phi[:, 0], phi[:, 1]
+    x, y = phi[:, 0], opens_up(phi[:, 0], phi[:, 1])
     x, y = x / (x.std() or 1.0), y / (y.std() or 1.0)
     vmax = 360.0 if units == "deg" else 2 * np.pi
     ax.scatter(x, y, c=np.mod(colour, vmax), cmap=CMAP, vmin=0.0, vmax=vmax, marker="o", s=POINT_SIZE, linewidths=0)
