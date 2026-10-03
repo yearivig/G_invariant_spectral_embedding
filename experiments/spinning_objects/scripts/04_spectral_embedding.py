@@ -108,7 +108,8 @@ def main() -> None:
                     help="skip the SO(2) minimum kernel (the integral kernel still runs unless --no-integral)")
     ap.add_argument("--min-distances", type=Path, default=None,
                     help="reuse a saved so2_min_sq_distances.npy instead of recomputing the minimum distances")
-    ap.add_argument("--device", default=None, help="torch device, e.g. cuda:0 (default: auto)")
+    ap.add_argument("--device", default=None,
+                    help="torch device: cpu, cuda, cuda:0 or mps (default: CUDA if available, else the CPU)")
     ap.add_argument("--dry-run", action="store_true", help="validate and estimate cost, then stop")
     args = ap.parse_args()
 
@@ -176,7 +177,10 @@ def main() -> None:
     # Sorted by filename, as labels.csv is below, so row i is image i.
     logger.info(f"[1/3] loading {n} rotated images")
     files = sorted(img_dir.glob(f"{prefix}*.png"))[:n]
-    images = np.stack([np.asarray(Image.open(f).convert("L"), dtype=np.float32) / 255.0 for f in files])
+    first = np.asarray(Image.open(files[0]).convert("L"))
+    images = np.empty((n, *first.shape), dtype=np.float32)          # filled in place: one copy of the data
+    for k, f in enumerate(files):
+        images[k] = np.asarray(Image.open(f).convert("L"), dtype=np.float32) / 255.0
     rows = sorted(csv.DictReader(open(args.dataset / "labels.csv")), key=lambda r: r["filename"])[:n]
     if [r["filename"] for r in rows] != [f.name for f in files]:
         sys.exit("labels.csv does not list the same files as images/")

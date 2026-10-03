@@ -35,14 +35,19 @@ experiment. knn_epsilon() gives a data-driven choice, (mean distance to the
 k nearest neighbours)^2.
 
 Devices: the SO(2) pass (rotating and comparing images, the slow step) runs
-on the GPU when there is one, CUDA or Apple's Metal (MPS), else on the CPU.
+on a CUDA GPU when there is one, else on the CPU; Apple's GPU (MPS) only when
+asked for (device="mps"), since on an Apple M2 it was no faster than the CPU.
 Each block of images is rotated by a batch of angles once, and its squared
-distances to all earlier images come from one matrix product,
+distances to all images come from one matrix product,
 ||x||^2 + ||Ry||^2 - 2 <x, Ry>. Image products are float32; they are
 accumulated in float64, except on Apple GPUs, which have no float64 (float32
 there: an error of about 1e-2 in a squared distance, against epsilon ~ 1e2).
 Euclidean distances and the eigenvectors are always computed in float64, on
 the CPU unless CUDA is available.
+
+Memory: on the CPU the images are used in place (no copy), and Euclidean
+distances are computed block by block, so the peak is about the size of the
+images (2 GB for 5184 images of 308 x 308) plus a few hundred MB.
 """
 
 from __future__ import annotations
@@ -66,14 +71,10 @@ NUM_GROUP_ELEMENTS = 300   # default number of SO(2) elements for the invariant 
 
 
 def _get_device(device: DeviceStr | None = None) -> torch.device:
-    """Resolve a device string; by default a CUDA GPU, else an Apple GPU (MPS), else the CPU."""
+    """Resolve a device string; by default a CUDA GPU if there is one, else the CPU (MPS only on request)."""
     if device is not None:
         return torch.device(device)
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-    if torch.backends.mps.is_available():
-        return torch.device("mps")
-    return torch.device("cpu")
+    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def _float64_device(device: DeviceStr | None = None) -> torch.device:
@@ -83,7 +84,10 @@ def _float64_device(device: DeviceStr | None = None) -> torch.device:
 
 
 def _as_tensor(x, dev: torch.device) -> torch.Tensor:
+    """float32 tensor on dev; a float32 NumPy array on the CPU is shared, not copied."""
     if isinstance(x, np.ndarray):
+        if dev.type == "cpu" and x.dtype == np.float32:
+            return torch.from_numpy(np.ascontiguousarray(x))
         return torch.tensor(x, dtype=torch.float32, device=dev)
     return x.to(device=dev, dtype=torch.float32)
 
@@ -98,11 +102,27 @@ def so2_angles(num_group_elements: int = NUM_GROUP_ELEMENTS) -> np.ndarray:
 # ---------------------------------------------------------------------------
 
 
-def euclidean_sq_distances(data: np.ndarray, device: DeviceStr | None = None) -> np.ndarray:
-    """||x_i - x_j||^2 for rows of data (n, D), as a float64 (n, n) array."""
+def euclidean_sq_distances(data: np.ndarray, device: DeviceStr | None = None, block: int = 512) -> np.ndarray:
+    """||x_i - x_j||^2 for rows of data (n, D), as a float64 (n, n) array.
+
+    Computed in float64 block by block, ||x||^2 + ||y||^2 - 2 <x, y>, so only two
+    blocks of rows are ever held in float64 rather than a float64 copy of all data.
+    """
     dev = _float64_device(device)
-    X = _as_tensor(np.asarray(data).reshape(len(data), -1), dev).double()
-    d2 = torch.cdist(X, X, p=2) ** 2
+    X = _as_tensor(np.asarray(data).reshape(len(data), -1), torch.device("cpu"))
+    n = len(X)
+    sq = torch.cat([X[i:i + block].double().pow(2).sum(dim=1) for i in range(0, n, block)]).to(dev)
+    d2 = torch.empty((n, n), dtype=torch.float64, device=dev)
+    for i0 in range(0, n, block):
+        i1 = min(i0 + block, n)
+        Xi = X[i0:i1].to(dev).double()
+        for j0 in range(i0, n, block):
+            j1 = min(j0 + block, n)
+            Xj = Xi if j0 == i0 else X[j0:j1].to(dev).double()
+            blk = (sq[i0:i1, None] + sq[None, j0:j1] - 2 * Xi @ Xj.T).clamp_min(0.0)
+            d2[i0:i1, j0:j1] = blk
+            if j0 != i0:
+                d2[j0:j1, i0:i1] = blk.T
     d2.fill_diagonal_(0.0)
     return d2.cpu().numpy()
 
@@ -123,7 +143,7 @@ def _so2_pass(images, num_group_elements: int, device, chunk_size: int, epsilon:
     data = _as_tensor(images, dev)
     n = data.shape[0]
     flat = data.reshape(n, -1)
-    sq = flat.pow(2).sum(dim=1, dtype=acc_t)
+    sq = torch.cat([flat[i:i + 512].pow(2).sum(dim=1, dtype=acc_t) for i in range(0, n, 512)])   # no squared copy
     # Apple GPUs are slow at products with one very long inner dimension (the pixels); splitting the
     # pixel sum into `split` equal pieces and adding the partial products is about 5x faster there.
     P = flat.shape[1]

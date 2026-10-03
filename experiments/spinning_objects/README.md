@@ -104,11 +104,14 @@ without starting. Each invariant kernel compares every ordered pair of the
 5184 images under 300 rotations (script 04's own default, and `run_all.sh`'s):
 about 8e14 element-operations per kernel. Each block of images is rotated
 once per angle and its distances to all images come from one matrix product,
-on the GPU if there is one (CUDA, or Apple's Metal). On an Apple M2 this is
-estimated at roughly 40–60 minutes per invariant kernel, on its GPU or its
-CPU alike, so about 1.5–2 hours for the whole run (an earlier, pair-by-pair
-version took about two days per kernel). The rotated images take ~2 GB of
-memory, and the run holds two or three copies.
+on a CUDA GPU if there is one and otherwise on the CPU (`--device mps` uses
+an Apple GPU, which on an M2 was no faster than its CPU). On an Apple M2 CPU
+this is estimated at roughly 40–60 minutes per invariant kernel, so about
+1.5–2 hours for the whole run (an earlier, pair-by-pair version took about two
+days per kernel). The rotated images take ~2 GB of memory and are held once;
+the run peaks at about 5 GB, so close other applications on an 8 GB machine.
+Start long runs from a terminal with `caffeinate -i bash run_all.sh` so the
+Mac does not sleep.
 
 ## The COIL background
 
@@ -260,8 +263,8 @@ directory holds the pickles, the stereo and donut figures and `run_config.json`
 ## Requirements
 
 `numpy`, `scipy`, `matplotlib`, `pillow` for scripts 01–03 and the tools; plus
-`torch` and `torchvision` for script 04. A GPU is used when available (CUDA,
-or Apple's Metal through PyTorch's MPS backend) but is not required.
+`torch` and `torchvision` for script 04. A CUDA GPU is used when available;
+an Apple GPU only with `--device mps`. Neither is required.
 
 `requirements.txt` lists the packages unpinned; `requirements-lock.txt` pins
 the exact versions the published dataset was built with (Python 3.14). The
