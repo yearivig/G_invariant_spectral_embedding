@@ -58,8 +58,8 @@ seconds.
 ## Quick start
 
 ```bash
-python3.12 -m venv .venv && source .venv/bin/activate    # Python 3.12 recommended; 3.14 also tested
-pip install -r requirements.txt        # or requirements-lock.txt for the exact versions used
+python3.12 -m venv .venv && source .venv/bin/activate    # Python 3.12 is the version this uses
+pip install -r requirements-lock.txt   # the pinned versions; requirements.txt for unpinned
 bash run_all.sh
 ```
 
@@ -266,14 +266,17 @@ directory holds the pickles, the stereo and donut figures and `run_config.json`
 `torch` and `torchvision` for script 04. A CUDA GPU is used when available;
 an Apple GPU only with `--device mps`. Neither is required.
 
-`requirements.txt` lists the packages unpinned; `requirements-lock.txt` pins
-the exact versions the published dataset was built with (Python 3.14). The
-same versions install on Python 3.12, the recommended version: on 3.12.1 the
-dataset rebuilds byte-identically (every PNG and `labels.csv`) and the
-embeddings are bit-identical to 3.14 (minimum kernel from the saved distances,
-all 5184 images; Euclidean kernel, first 1000). The images are integer PNGs,
-so rebuilding them is insensitive to minor version drift, but the embeddings
-are floating point and are best compared under the locked versions.
+**Python 3.12** is the version this experiment runs on, and `.venv/` is built
+with it. `requirements.txt` lists the packages unpinned; `requirements-lock.txt`
+pins the exact versions, which install unchanged on 3.12.
+
+The published dataset was originally built under Python 3.14, and 3.12 was
+checked against it: on 3.12.1 the dataset rebuilds byte-identically (every PNG
+and `labels.csv`) and the embeddings are bit-identical to the 3.14 results
+(minimum kernel from the saved distances, all 5184 images; Euclidean kernel,
+first 1000). The images are integer PNGs, so rebuilding them is insensitive to
+minor version drift, but the embeddings are floating point and are best
+compared under the locked versions.
 
 ## Sources
 

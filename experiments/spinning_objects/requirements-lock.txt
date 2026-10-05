@@ -1,7 +1,9 @@
-# Exact versions used to build the published dataset (Python 3.14.0, Darwin arm64).
-# Python 3.12 (recommended) installs these same versions; on 3.12.1 the dataset
-# rebuilds byte-identically and the embeddings are bit-identical to 3.14.
-# Install with: pip install -r requirements-lock.txt
+# Pinned versions for this experiment. Python 3.12 (Darwin arm64) is what it
+# runs on; install with:  pip install -r requirements-lock.txt
+#
+# These are the versions the published dataset was built with, originally under
+# Python 3.14.0. They install unchanged on 3.12: on 3.12.1 the dataset rebuilds
+# byte-identically and the embeddings are bit-identical to the 3.14 results.
 contourpy==1.4.0
 cycler==0.12.1
 filelock==4.0.2
