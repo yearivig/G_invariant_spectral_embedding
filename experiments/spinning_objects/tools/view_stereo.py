@@ -141,6 +141,7 @@ def hue_wheel(lightness: float = 0.70, chroma: float = 0.11, n: int = 256):
     return ListedColormap(rgb, name="oklab_wheel")
 
 
+CMAP_A, CMAP_B = "twilight", hue_wheel()   # one cyclic map per angle, so the two colourings never look alike
 THRESHOLD = 0.45     # a pair scoring above this is not a circle (0.5 = two unrelated eigenvectors)
 COVERAGE = 0.80      # the two recovered angles must fill at least this share of a 12 x 12 grid
 SEARCH = 4           # use the first four eigenvectors
@@ -209,7 +210,7 @@ def save_figure(U, tA, tB, title: str, style: str, path: Path, threshold: float 
     res = analyse(U, threshold, coverage)
     X3 = coords(U, res["pairs"], style)
     lim = float(np.percentile(np.abs(np.concatenate(X3)), 99.5))
-    cmaps = {"A": "twilight", "B": hue_wheel()}  # a different cyclic palette for each angle
+    cmaps = {"A": CMAP_A, "B": CMAP_B}  # a different cyclic palette for each angle
     fig = plt.figure(figsize=(12, 10), facecolor="white")
     for row, (c_, name, key) in enumerate(((tA, r"$\theta_A$", "A"), (tB, r"$\theta_B$", "B"))):
         for col, (elev, view) in enumerate(((88, "top view"), (12, "side view"))):
@@ -269,7 +270,7 @@ def main() -> None:
     report(title, res)
     X3 = coords(U, res["pairs"], args.style)
     lim = float(np.percentile(np.abs(np.concatenate(X3)), 99.5))
-    cmap = "twilight" if args.color == "A" else hue_wheel()
+    cmap = CMAP_A if args.color == "A" else CMAP_B
     fig = plt.figure(figsize=(8, 8), facecolor="white")
     ax = fig.add_subplot(projection="3d")
     sc = _draw(ax, X3, lim, tA if args.color == "A" else tB, 35, cmap)
