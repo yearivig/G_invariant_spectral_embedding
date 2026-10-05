@@ -15,3 +15,6 @@ experiments/spinning_objects/data/
 experiments/*/results/*
 !experiments/so3_so2_convergence/results/so3_so2_P_1_00_results.pkl
 !experiments/so3_so2_convergence/results/plots_fitted_slopes/
+
+# macOS Finder metadata
+.DS_Store
