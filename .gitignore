@@ -2,12 +2,19 @@ __pycache__/
 *.py[cod]
 *.log
 *.pkl
+.venv/
 
 # External/raw datasets are documented but not committed.
-data/data_3D.pkl
-data/new_dataset_5.3.26/
-projection_data/
-newest_dataset/
+experiments/3d_point_clouds/data/*
+experiments/tomographic_images/data/*
+!experiments/*/data/README.md
+experiments/spinning_objects/data/
 
-# Local rerun outputs.
-results/**/new_run/
+# Outputs: each experiment writes to its own results/ (not committed),
+# except the Section 3.5 results behind Figure 2.
+experiments/*/results/*
+!experiments/so3_so2_convergence/results/so3_so2_P_1_00_results.pkl
+!experiments/so3_so2_convergence/results/plots_fitted_slopes/
+
+# macOS Finder metadata
+.DS_Store
